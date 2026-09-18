@@ -1,0 +1,6 @@
+{
+  "name": "SkillNexus",
+  "description": "Creator marketplace platform where young creators monetize their skills and clients book them. Includes gig posting, search & discovery, booking workflows, creator dashboard, client tracking, and architectural decision point evaluations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
