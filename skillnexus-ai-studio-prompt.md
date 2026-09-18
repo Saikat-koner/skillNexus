@@ -1,13 +1,13 @@
 # 🚀 SKILLNEXUS MASTER PROMPT FOR GOOGLE AI STUDIO (`skillnexus-2.ai.studio`)
 
-Copy and paste the entire prompt below directly into **AI Studio** to overhaul, finish, and connect SkillNexus to Supabase:
+Copy and paste the entire prompt below directly into **AI Studio** to overhaul, finish, and connect SkillNexus to **Firebase** (Authentication, Cloud Firestore, Firebase Storage & Real-Time Listeners):
 
 ---
 
 ```markdown
-# ⚡ SKILLNEXUS — PRODUCTION CREATOR MARKETPLACE & GIG BOOKING PLATFORM
+# ⚡ SKILLNEXUS — PRODUCTION CREATOR MARKETPLACE & GIG BOOKING PLATFORM (FIREBASE BACKEND)
 
-Transform and complete the SkillNexus web application (`https://skillnexus-2.ai.studio`) into a live, world-class, multi-featured Creator Marketplace and 1-on-1 Mentorship platform. The application must feature high-converting modern aesthetics (Glassmorphism, dark/light mode, cyber-indigo accents, smooth micro-interactions), complete Supabase PostgreSQL backend integration, real-time messaging, and multi-tier gig escrow workflows.
+Transform and complete the SkillNexus web application (`https://skillnexus-2.ai.studio`) into a live, world-class, multi-featured Creator Marketplace and 1-on-1 Mentorship platform powered by **Firebase** (Firebase Authentication, Cloud Firestore NoSQL Database, Firebase Storage, and Real-Time Listeners). The application must feature high-converting modern aesthetics (Glassmorphism, dark/light mode, cyber-indigo accents, smooth micro-interactions), complete Firebase backend integration, real-time messaging, and multi-tier gig escrow workflows.
 
 ---
 
@@ -43,7 +43,7 @@ Transform and complete the SkillNexus web application (`https://skillnexus-2.ai.
   - Client Requirements submission step (text description + file attachments).
 - **Interactive Order Status Machine**:
   - `pending_requirements` $\rightarrow$ `in_progress` (Live SLA countdown timer) $\rightarrow$ `delivered` (Download delivery files & preview) $\rightarrow$ `revision_requested` $\rightarrow$ `completed`.
-- Client approval button releases payment to creator balance and prompts a 5-star review modal.
+- Client approval button releases payment to creator balance in Firestore and prompts a 5-star review modal.
 
 ### C. 📅 1-on-1 Mentorship & Live Video Consultation Scheduler
 - Dedicated booking tab on creator profiles:
@@ -52,11 +52,11 @@ Transform and complete the SkillNexus web application (`https://skillnexus-2.ai.
   - Auto-generated Google Meet / Zoom meeting link upon booking confirmation.
   - Client & Creator calendar countdown ticker.
 
-### D. 💬 Real-Time Direct Messaging & File Sharing (Supabase Realtime)
+### D. 💬 Real-Time Direct Messaging & File Sharing (Cloud Firestore Real-Time Listeners)
 - Persistent floating chat window and full-page Inbox:
-  - Real-time conversation stream using `supabase.from('direct_messages').stream()`.
+  - Real-time conversation stream using Firestore `onSnapshot` on `conversations/{id}/messages`.
   - Send custom project proposals / quotes directly inside chat with an `[Accept Offer]` button.
-  - Instant image and document attachment uploads.
+  - Instant image and document attachment uploads to Firebase Storage (`chat-attachments/`).
   - Online presence indicators and message read receipts.
 
 ### E. 📊 Dual Role Portals (Creator Command Center vs. Client Dashboard)
@@ -67,7 +67,7 @@ Transform and complete the SkillNexus web application (`https://skillnexus-2.ai.
   - Gig manager (Create, Edit, Pause, Publish new gigs with 3-tier pricing).
 - **Client / Buyer Portal**:
   - Active gig orders tracking with live deadline countdowns.
-  - Saved wishlist / bookmarked creators.
+  - Saved wishlist / bookmarked creators in Firestore.
   - Scheduled 1-on-1 consultation calendar.
 
 ### F. 🏆 Creator Tier & Trust Gamification
@@ -77,24 +77,31 @@ Transform and complete the SkillNexus web application (`https://skillnexus-2.ai.
 
 ---
 
-## 🗄️ 3. SUPABASE BACKEND INTEGRATION ARCHITECTURE
+## 🗄️ 3. FIREBASE BACKEND INTEGRATION ARCHITECTURE
 
-Ensure the client connects seamlessly to Supabase using:
-1. **Supabase Auth**: Email/Password login, Google OAuth, and automatic `profiles` row generation via trigger.
-2. **Postgres Database Tables**:
-   - `profiles`, `gig_categories`, `gigs`, `orders`, `consultations`, `conversations`, `direct_messages`, `reviews`, `payout_requests`, `gig_bookmarks`.
-3. **Supabase Storage Buckets**:
-   - `gig-covers` (public gig thumbnails)
-   - `portfolio-media` (creator showcases)
-   - `order-deliverables` (private deliverables for buyers/sellers)
-   - `avatars` (user profile pictures)
-4. **Real-time Subscriptions**:
-   - Live chat streams (`direct_messages`), order status updates (`orders`), and unread notification badges.
+Ensure the client connects seamlessly to Firebase using:
+1. **Firebase Authentication**: Email/Password login, Google Sign-In, and automatic `profiles/{uid}` document initialization.
+2. **Cloud Firestore Collections**:
+   - `profiles`: User information, creator tiers, balances (`escrowBalance`, `withdrawableBalance`), ratings.
+   - `gig_categories`: Category taxonomies and metadata.
+   - `gigs`: Active gig listings with 3-tier pricing models (`starter`, `standard`, `pro`), turnaround days, deliverables, and search tags.
+   - `orders`: Escrow orders with lifecycle status (`in_progress`, `delivered`, `completed`, `cancelled`), delivery due dates, requirement notes.
+   - `consultations`: 1-on-1 mentorship appointments with Google Meet links.
+   - `conversations` & subcollection `messages`: Real-time chat messages with attachment URLs and proposal quotes.
+   - `reviews`: Verified buyer ratings and reviews.
+   - `payout_requests`: Creator withdrawal requests.
+3. **Firebase Storage Buckets & Paths**:
+   - `avatars/{userId}/`: Creator and buyer profile photos.
+   - `gig-covers/{userId}/`: Gig thumbnail and portfolio imagery.
+   - `order-deliverables/{orderId}/`: High-res files and deliverables submitted by creators.
+   - `chat-attachments/{conversationId}/`: Direct message documents and media attachments.
+4. **Environment Variables**:
+   - `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID`.
 
 ---
 
 ## 🧪 4. CODE QUALITY & COMPATIBILITY
-- 100% Web-Safe (use in-memory `Uint8List` byte buffers for file uploads, zero `dart:io` imports).
+- 100% Web-Safe (use in-memory `Uint8List` / `Blob` buffers for file uploads).
 - Zero compilation errors and zero linter warnings.
 - Responsive layout supporting Desktop (1440px+), Tablet (768px), and Mobile (375px+).
 ```

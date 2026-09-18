@@ -3,10 +3,10 @@
 # ⚡ SkillNexus (क्रिएटर मार्केटप्लेस)
 ### *The Next-Generation Creator Marketplace, Multi-Tier Gig Booking & 1-on-1 Mentorship Platform*
 
-[![Supabase](https://img.shields.io/badge/Supabase-Realtime%20Postgres-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+[![Firebase](https://img.shields.io/badge/Firebase-Firestore%20%26%20Storage-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
 [![Web Platform](https://img.shields.io/badge/Platform-Web%20Ready-02569B?style=for-the-badge&logo=googlechrome&logoColor=white)](https://skillnexus-2.ai.studio)
-[![Database](https://img.shields.io/badge/PostgreSQL-15+-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org)
-[![Security](https://img.shields.io/badge/Security-Row%20Level%20RLS-orange?style=for-the-badge&logo=securityscorecard&logoColor=white)](skillnexus-migration.sql)
+[![Cloud Firestore](https://img.shields.io/badge/Firestore-NoSQL%20Realtime-FFA611?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/docs/firestore)
+[![Security](https://img.shields.io/badge/Security-Firestore%20Rules-orange?style=for-the-badge&logo=securityscorecard&logoColor=white)](firestore.rules)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 ---
@@ -19,7 +19,7 @@
 
 ## 📖 Overview
 
-**SkillNexus** is a full-stack, real-time creator marketplace and gig booking ecosystem designed for the modern creator economy. It allows digital creators, AI developers, UI/UX designers, video editors, and technical mentors to showcase their skills, sell multi-tier service packages, manage active client milestones, and host live 1-on-1 consultation sessions.
+**SkillNexus** is a full-stack, real-time creator marketplace and gig booking ecosystem designed for the modern creator economy. Powered by **Firebase** (Cloud Firestore, Firebase Authentication, Firebase Storage) and modern frontend architectures (React 19, TypeScript, Vite, Flutter Web), it empowers digital creators, AI developers, UI/UX designers, video editors, and technical mentors to showcase their skills, sell multi-tier service packages, manage active client milestones, and host live 1-on-1 consultation sessions.
 
 ---
 
@@ -54,7 +54,7 @@
 - Automated Google Meet / Zoom meeting link delivery.
 
 ### 4. 💬 Real-Time Direct Messaging
-- Streamed instant chat powered by **Supabase Realtime**.
+- Streamed instant chat powered by **Cloud Firestore Real-Time Listeners (`onSnapshot`)**.
 - Support for inline file attachments, project quotes, and custom offers.
 
 ### 5. 🏆 Creator Gamification & Trust Score
@@ -66,34 +66,39 @@
 
 ---
 
-## 🗄️ Database Architecture (Supabase PostgreSQL)
+## 🗄️ Database Architecture (Cloud Firestore & Storage)
 
-The backend runs on PostgreSQL with **Row Level Security (RLS)** and automated triggers:
+The backend runs on Google Cloud Firestore with comprehensive **Security Rules** (`firestore.rules`) and **Storage Rules** (`storage.rules`):
 
-| Table | Purpose | Security Policy |
+| Collection | Purpose | Security Policy |
 | :--- | :--- | :--- |
-| `profiles` | Creator & client identities, bio, skills, rating, earnings, and badges | Public read; Auth user update |
-| `gig_categories` | 8 primary domains (AI, Web/Mobile, UI/UX, Video, Web3, Audio, Growth, Writing) | Public read |
-| `gigs` | Creator service listings with 3-tier pricing JSON and cover media | Public read (active); Creator edit |
-| `orders` | Transaction ledger, requirements, delivery notes, and escrow status | Buyer & Seller read/update |
-| `consultations` | 1-on-1 scheduled booking slots with meeting URLs | Client & Creator private access |
-| `conversations` & `direct_messages` | Real-time chat streams with attachments | Chat participants only |
-| `reviews` | Verified purchase feedback with sub-ratings (Quality, Speed, Communication) | Public read; Buyer submit |
-| `payout_requests` | Creator balance withdrawals (Stripe Connect, PayPal, Bank Wire, USDC) | Creator view/submit |
+| `profiles/{userId}` | Creator & client identities, bio, skills, rating, earnings, and badges | Public read; Owner write |
+| `gig_categories/{categoryId}` | 8 primary domains (AI, Web/Mobile, UI/UX, Video, Web3, Audio, Growth, Writing) | Public read; Admin write |
+| `gigs/{gigId}` | Creator service listings with 3-tier pricing, turnaround days, and media | Public read (active); Creator edit |
+| `orders/{orderId}` | Transaction ledger, requirements, delivery notes, and escrow status | Buyer & Seller read/update |
+| `consultations/{consultationId}` | 1-on-1 scheduled booking slots with meeting URLs | Client & Creator private access |
+| `conversations/{id}/messages` | Real-time chat streams with attachments | Chat participants only |
+| `reviews/{reviewId}` | Verified purchase feedback with sub-ratings (Quality, Speed, Communication) | Public read; Buyer submit |
+| `payout_requests/{requestId}` | Creator balance withdrawals (Stripe Connect, PayPal, Bank Wire, USDC) | Creator view/submit |
 
 ---
 
-## 🚀 Supabase Setup Instructions
+## 🚀 Firebase Setup Instructions
 
-1. **Create a Supabase Project**: Go to [supabase.com](https://supabase.com) and create a new project.
-2. **Run Schema Migration**:
-   - Open **SQL Editor** in your Supabase dashboard.
-   - Copy the contents of [`skillnexus-migration.sql`](skillnexus-migration.sql) and click **Run**.
-3. **Configure Storage Buckets**:
-   - The migration automatically creates `gig-covers`, `portfolio-media`, `avatars`, and `order-deliverables`.
-4. **Copy API Keys**:
-   - Navigate to **Project Settings $\rightarrow$ API**.
-   - Copy `Project URL` and `anon public key`.
+1. **Create a Firebase Project**: Go to [console.firebase.google.com](https://console.firebase.google.com) and create a new project.
+2. **Enable Firestore & Storage**:
+   - Create a Cloud Firestore database in production mode.
+   - Deploy security rules: `firebase deploy --only firestore:rules,storage`.
+3. **Configure Environment Variables**:
+   Create a `.env` file with your web app credentials:
+   ```env
+   VITE_FIREBASE_API_KEY="AIzaSyYourActualApiKeyHere"
+   VITE_FIREBASE_AUTH_DOMAIN="your-app.firebaseapp.com"
+   VITE_FIREBASE_PROJECT_ID="your-app-id"
+   VITE_FIREBASE_STORAGE_BUCKET="your-app-id.appspot.com"
+   VITE_FIREBASE_MESSAGING_SENDER_ID="123456789012"
+   VITE_FIREBASE_APP_ID="1:123456789012:web:abcdef123456"
+   ```
 
 ---
 
