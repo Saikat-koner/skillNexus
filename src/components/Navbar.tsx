@@ -33,6 +33,7 @@ interface NavbarProps {
   onOpenPostSkillModal: () => void;
   onOpenLiveWorkspace: () => void;
   barterChainsCount: number;
+  onOpenCommandPalette?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -47,6 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenPostSkillModal,
   onOpenLiveWorkspace,
   barterChainsCount,
+  onOpenCommandPalette,
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-xs">
@@ -198,6 +200,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Primary CTAs & Mode Switcher */}
         <div className="flex items-center gap-2">
+          {onOpenCommandPalette && (
+            <button
+              onClick={onOpenCommandPalette}
+              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-2.5 sm:px-3 py-2 text-xs font-semibold text-slate-600 transition-colors"
+              title="Global Search & Commands (⌘K / Ctrl+K)"
+            >
+              <kbd className="font-mono text-[10px] bg-white border border-slate-200 rounded px-1 text-indigo-600 font-bold">
+                ⌘K
+              </kbd>
+              <span className="hidden md:inline text-[11px] text-slate-500">Search</span>
+            </button>
+          )}
+
           {/* Mode Switcher Button */}
           <button
             onClick={() =>

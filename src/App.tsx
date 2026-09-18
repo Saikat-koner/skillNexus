@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar, AppMode, MarketplaceSubTab } from './components/Navbar';
 import { SkillGraphVisualization } from './components/SkillGraphVisualization';
 import { NexusBarterChainTool } from './components/NexusBarterChainTool';
@@ -10,6 +10,16 @@ import { EscrowVaultMilestoneValidator } from './components/EscrowVaultMilestone
 import { KnowledgePassportCard } from './components/KnowledgePassportCard';
 import { LiveBarterSessionWorkspace } from './components/LiveBarterSessionWorkspace';
 import { CreatorMarketplaceView } from './components/creator/CreatorMarketplaceView';
+import { FullStackSkillRoadmap } from './components/FullStackSkillRoadmap';
+import { ModernStackShowcase } from './components/ModernStackShowcase';
+import { FaqAccordion } from './components/FaqAccordion';
+import { CommandPalette } from './components/CommandPalette';
+import { OfflineBanner } from './components/OfflineBanner';
+import { FloatingSupport } from './components/FloatingSupport';
+import { CookieBanner } from './components/CookieBanner';
+import { LegalModal } from './components/LegalModals';
+import { BackToTop } from './components/BackToTop';
+import { StickyMobileCTA } from './components/StickyMobileCTA';
 import {
   ProposeChainModal,
   DirectSwapModal,
@@ -44,7 +54,11 @@ import {
   ShoppingBag,
   Sliders,
   ArrowRight,
-  PlusCircle
+  PlusCircle,
+  Code,
+  Layers,
+  HelpCircle,
+  FileText
 } from 'lucide-react';
 
 export default function App() {
@@ -52,6 +66,8 @@ export default function App() {
   const [appMode, setAppMode] = useState<AppMode>('creator_market');
   const [marketplaceTab, setMarketplaceTab] = useState<MarketplaceSubTab>('browse');
   const [isPostGigModalOpen, setIsPostGigModalOpen] = useState<boolean>(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
+  const [legalModalType, setLegalModalType] = useState<'privacy' | 'terms' | null>(null);
 
   const [skills, setSkills] = useState<SkillNode[]>(INITIAL_SKILL_NODES);
   const [edges, setEdges] = useState<SkillEdge[]>(INITIAL_SKILL_EDGES);
@@ -85,6 +101,64 @@ export default function App() {
 
   const handleDismissToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Global ⌘K / Ctrl+K listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleCommandAction = (actionId: string, meta?: any) => {
+    switch (actionId) {
+      case 'open_post_gig':
+        setAppMode('creator_market');
+        setIsPostGigModalOpen(true);
+        break;
+      case 'open_post_skill':
+        setAppMode('barter_network');
+        handleNavigate('post-skill-section');
+        break;
+      case 'open_live_swap':
+        setCurrentWorkspaceSession(activeSessions[0] || null);
+        setIsLiveWorkspaceOpen(true);
+        break;
+      case 'nav_roadmap':
+        handleNavigate('developer-roadmap-section');
+        break;
+      case 'nav_stack':
+        handleNavigate('hackathon-stack-section');
+        break;
+      case 'nav_faq':
+        handleNavigate('platform-faq-section');
+        break;
+      case 'nav_privacy':
+        setLegalModalType('privacy');
+        break;
+      case 'nav_terms':
+        setLegalModalType('terms');
+        break;
+      case 'select_skill':
+        if (meta?.skill) {
+          handleSelectSkillForBarter(meta.skill, 'learn');
+        }
+        break;
+      case 'book_mentorship':
+        if (meta?.skill) {
+          setAppMode('creator_market');
+          setMarketplaceTab('browse');
+          addToast('Mentorship Query', `Searching gigs & mentors for "${meta.skill}".`, 'info');
+        }
+        break;
+      default:
+        break;
+    }
   };
 
   // Scroll smoothly to section
@@ -387,6 +461,7 @@ export default function App() {
           setIsLiveWorkspaceOpen(true);
         }}
         barterChainsCount={barterChains.length}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
       />
 
       {/* Main Container */}
@@ -689,19 +764,140 @@ export default function App() {
             />
           </>
         )}
+
+        {/* ========================================================================= */}
+        {/* UNIVERSAL ECOSYSTEM SECTIONS (ROADMAP, MODERN STACK & FAQ)               */}
+        {/* ========================================================================= */}
+
+        {/* 1. Full Stack Developer Roadmap Section (Images 1 & 2) */}
+        <section id="developer-roadmap-section" className="pt-6">
+          <FullStackSkillRoadmap
+            onSelectSkill={(skillName) => {
+              if (appMode === 'creator_market') {
+                setMarketplaceTab('browse');
+                const el = document.getElementById('creator-marketplace-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } else {
+                handleSelectSkillForBarter(skillName, 'learn');
+              }
+              addToast('Skill Selected', `Filtering roadmap gigs & barter offers for "${skillName}".`, 'info');
+            }}
+            onBookMentorship={(skillName) => {
+              setCurrentWorkspaceSession(activeSessions[0] || null);
+              setIsLiveWorkspaceOpen(true);
+              addToast('Mentorship Session', `Opening 1-on-1 mentorship room for "${skillName}".`, 'success');
+            }}
+            onAddToast={addToast}
+          />
+        </section>
+
+        {/* 2. Modern AI & Hackathon Stack Showcase (Image 3) */}
+        <section id="hackathon-stack-section" className="pt-6">
+          <ModernStackShowcase onAddToast={addToast} />
+        </section>
+
+        {/* 3. Platform FAQ Section (Images 4 & 5) */}
+        <section id="platform-faq-section" className="pt-6">
+          <FaqAccordion />
+        </section>
       </main>
 
-      {/* Footer */}
-      <footer className="mt-16 border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500">
-        <div className="mx-auto max-w-7xl px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-800">SkillNexus</span>
-            <span>• Dynamic AI-Enhanced Knowledge Barter Network</span>
+      {/* Enhanced Production Footer */}
+      <footer className="mt-16 border-t border-slate-200 bg-white py-12 text-xs text-slate-500">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div className="space-y-3 md:col-span-2">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-600 to-cyan-600 text-white font-black text-sm">
+                  SN
+                </div>
+                <span className="text-base font-bold text-slate-900">Skill<span className="text-indigo-600">Nexus</span></span>
+                <span className="rounded-full bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 text-[10px] border border-emerald-200">Production v2.4</span>
+              </div>
+              <p className="text-slate-600 text-xs leading-relaxed max-w-md">
+                The dual-mode creative infrastructure for Gen-Z specialists. Monetize creator capabilities through milestone escrow or trade knowledge via autonomous multi-party barter loops.
+              </p>
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  onClick={() => setIsCommandPaletteOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100"
+                >
+                  <kbd className="font-mono bg-white border border-slate-200 rounded px-1 text-[10px]">⌘K</kbd>
+                  <span>Quick Commands</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-3">Platform Navigation</h4>
+              <ul className="space-y-2 text-xs">
+                <li>
+                  <button onClick={() => { setAppMode('creator_market'); setMarketplaceTab('browse'); }} className="hover:text-indigo-600 transition-colors">
+                    Browse Creator Gigs
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => { setAppMode('creator_market'); setMarketplaceTab('dashboard'); }} className="hover:text-indigo-600 transition-colors">
+                    Creator Dashboard
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => handleNavigate('developer-roadmap-section')} className="hover:text-indigo-600 transition-colors">
+                    Full Stack Roadmap (7 Branches)
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => handleNavigate('hackathon-stack-section')} className="hover:text-indigo-600 transition-colors">
+                    Modern Stack (Firebase, Groq, 21st.dev)
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => handleNavigate('platform-faq-section')} className="hover:text-indigo-600 transition-colors">
+                    FAQ & Security
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-3">Compliance & Escrow</h4>
+              <ul className="space-y-2 text-xs">
+                <li>
+                  <button onClick={() => setLegalModalType('privacy')} className="hover:text-indigo-600 transition-colors flex items-center gap-1">
+                    <Lock className="h-3 w-3 text-slate-400" />
+                    <span>Privacy Policy (GDPR/CCPA)</span>
+                  </button>
+                </li>
+                <li>
+                  <button onClick={() => setLegalModalType('terms')} className="hover:text-indigo-600 transition-colors flex items-center gap-1">
+                    <Scale className="h-3 w-3 text-slate-400" />
+                    <span>Terms & Escrow Agreement</span>
+                  </button>
+                </li>
+                <li>
+                  <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3" />
+                    <span>Milestone Escrow Protected</span>
+                  </span>
+                </li>
+                <li>
+                  <span className="text-slate-400">Firebase Firestore Real-time Sync</span>
+                </li>
+              </ul>
+            </div>
           </div>
-          <div className="flex items-center gap-4 text-slate-600">
-            <span>No Auth Required — Grader Interactive Mode</span>
-            <span>•</span>
-            <span className="text-emerald-600 font-semibold">100% Client-Side Escrow Simulation</span>
+
+          <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-400">
+            <div>
+              © 2026 SkillNexus Technologies Inc. All rights reserved.
+            </div>
+            <div className="flex items-center gap-4 text-xs">
+              <button onClick={() => setLegalModalType('privacy')} className="hover:text-slate-600">Privacy</button>
+              <span>•</span>
+              <button onClick={() => setLegalModalType('terms')} className="hover:text-slate-600">Terms</button>
+              <span>•</span>
+              <button onClick={() => handleNavigate('developer-roadmap-section')} className="hover:text-slate-600">Roadmap</button>
+            </div>
           </div>
         </div>
       </footer>
@@ -728,6 +924,50 @@ export default function App() {
         session={currentWorkspaceSession || activeSessions[0] || null}
         onAttestAndSettle={handleAttestAndSettleFromWorkspace}
         onAddToast={addToast}
+      />
+
+      {/* 20 Crucial Production & UI Polish Widgets */}
+      <OfflineBanner />
+      <FloatingSupport />
+      <BackToTop />
+      <StickyMobileCTA
+        currentMode={appMode}
+        currentTab={marketplaceTab}
+        onSetAppMode={setAppMode}
+        onNavigateTab={(tab) => {
+          setAppMode('creator_market');
+          setMarketplaceTab(tab);
+          const el = document.getElementById('creator-marketplace-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+        onOpenPostGig={() => {
+          setAppMode('creator_market');
+          setIsPostGigModalOpen(true);
+        }}
+        onOpenLiveSwap={() => {
+          setCurrentWorkspaceSession(activeSessions[0] || null);
+          setIsLiveWorkspaceOpen(true);
+        }}
+      />
+      <CookieBanner
+        onOpenPrivacyPolicy={() => setLegalModalType('privacy')}
+        onOpenTerms={() => setLegalModalType('terms')}
+      />
+      <LegalModal
+        isOpen={!!legalModalType}
+        type={legalModalType || 'privacy'}
+        onClose={() => setLegalModalType(null)}
+      />
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onSelectAction={handleCommandAction}
+        onNavigateMarketplaceTab={(tab) => {
+          setAppMode('creator_market');
+          setMarketplaceTab(tab);
+        }}
+        onSetAppMode={setAppMode}
       />
 
       <ToastContainer toasts={toasts} onDismiss={handleDismissToast} />
