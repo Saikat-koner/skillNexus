@@ -11,7 +11,8 @@ import {
   Sparkles,
   Info
 } from 'lucide-react';
-import { GigItem, BookingItem, DoubleBookingPolicy } from '../../types';
+import { GigItem, BookingItem, DoubleBookingPolicy, CurrencyCode } from '../../types';
+import { formatPrice } from '../../utils/currency';
 
 interface BookGigModalProps {
   gig: GigItem | null;
@@ -20,6 +21,7 @@ interface BookGigModalProps {
   doubleBookingPolicy: DoubleBookingPolicy;
   onConfirmBooking: (newBooking: BookingItem) => void;
   onViewMyBookings: () => void;
+  currency?: CurrencyCode;
 }
 
 export const BookGigModal: React.FC<BookGigModalProps> = ({
@@ -29,6 +31,7 @@ export const BookGigModal: React.FC<BookGigModalProps> = ({
   doubleBookingPolicy,
   onConfirmBooking,
   onViewMyBookings,
+  currency = 'USD',
 }) => {
   if (!isOpen || !gig) return null;
 
@@ -138,7 +141,7 @@ export const BookGigModal: React.FC<BookGigModalProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-slate-500">Agreed Rate:</span>
                 <span className="font-bold text-slate-900">
-                  ${confirmedBooking.rate} {confirmedBooking.rateType === 'hourly' ? '/ hr' : 'Fixed'}
+                  {formatPrice(confirmedBooking.rate, currency)} {confirmedBooking.rateType === 'hourly' ? '/ hr' : 'Fixed'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -150,7 +153,7 @@ export const BookGigModal: React.FC<BookGigModalProps> = ({
                   <ShieldCheck className="h-3.5 w-3.5" />
                   Client Protection:
                 </span>
-                <span>$0 Charged until Creator Accepts</span>
+                <span>$0 Charged until Creator Accepts (Hold Protection)</span>
               </div>
             </div>
 
@@ -204,7 +207,8 @@ export const BookGigModal: React.FC<BookGigModalProps> = ({
               <div>
                 <span className="text-[10px] uppercase font-bold text-indigo-600 tracking-wider">Service Fee</span>
                 <div className="text-base font-extrabold text-indigo-950">
-                  ${gig.rate} <span className="text-xs font-normal text-indigo-700">/{gig.rateType}</span>
+                  {formatPrice(gig.rate, currency)}{' '}
+                  <span className="text-xs font-normal text-indigo-700">/{gig.rateType}</span>
                 </div>
               </div>
               <div className="text-right">
@@ -311,7 +315,11 @@ export const BookGigModal: React.FC<BookGigModalProps> = ({
                   className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-indigo-600/20 hover:from-indigo-700 hover:to-cyan-700 disabled:opacity-50 transition-all active:scale-[0.98]"
                 >
                   <Sparkles className="h-4 w-4" />
-                  <span>{isStrictLocked ? 'Creator Busy' : `Confirm Booking ($${gig.rate})`}</span>
+                  <span>
+                    {isStrictLocked
+                      ? 'Creator Busy'
+                      : `Confirm Booking (${formatPrice(gig.rate, currency)})`}
+                  </span>
                 </button>
               </div>
             </div>

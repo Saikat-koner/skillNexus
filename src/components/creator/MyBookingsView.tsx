@@ -14,7 +14,8 @@ import {
   Sparkles,
   Info
 } from 'lucide-react';
-import { BookingItem, BookingStatus, GigCategory } from '../../types';
+import { BookingItem, BookingStatus, GigCategory, CurrencyCode } from '../../types';
+import { formatPrice } from '../../utils/currency';
 
 interface MyBookingsViewProps {
   bookings: BookingItem[];
@@ -22,6 +23,7 @@ interface MyBookingsViewProps {
   onResubmitBooking: (booking: BookingItem) => void;
   onBrowseMarketplace: () => void;
   onAddToast: (title: string, message: string, type?: 'success' | 'info' | 'chain') => void;
+  currency?: CurrencyCode;
 }
 
 export const MyBookingsView: React.FC<MyBookingsViewProps> = ({
@@ -30,6 +32,7 @@ export const MyBookingsView: React.FC<MyBookingsViewProps> = ({
   onResubmitBooking,
   onBrowseMarketplace,
   onAddToast,
+  currency = 'USD',
 }) => {
   const [filterStatus, setFilterStatus] = useState<'All' | BookingStatus>('All');
   const [activeDP1Explainer, setActiveDP1Explainer] = useState<string | null>(null);
@@ -157,7 +160,7 @@ export const MyBookingsView: React.FC<MyBookingsViewProps> = ({
                       </span>
                       <span className="flex items-center gap-1">
                         <DollarSign className="h-3.5 w-3.5 text-slate-400" />
-                        Agreed Rate: <strong className="text-slate-800">${b.rate}</strong>
+                        Agreed Rate: <strong className="text-slate-800">{formatPrice(b.rate, currency)}</strong>
                       </span>
                     </div>
                     <span className="text-[11px] text-slate-400">Requested: {b.submittedAt}</span>

@@ -10,6 +10,11 @@ import { EscrowVaultMilestoneValidator } from './components/EscrowVaultMilestone
 import { KnowledgePassportCard } from './components/KnowledgePassportCard';
 import { LiveBarterSessionWorkspace } from './components/LiveBarterSessionWorkspace';
 import { CreatorMarketplaceView } from './components/creator/CreatorMarketplaceView';
+import { BriefAiCopilotModal } from './components/creator/BriefAiCopilotModal';
+import { FreelanceRateCalculatorModal } from './components/creator/FreelanceRateCalculatorModal';
+import { EscrowDisputeArbitratorModal } from './components/creator/EscrowDisputeArbitratorModal';
+import { CircularBarterLoopVisualizer } from './components/creator/CircularBarterLoopVisualizer';
+import { CreatorPassportCardModal } from './components/creator/CreatorPassportCardModal';
 import { FullStackSkillRoadmap } from './components/FullStackSkillRoadmap';
 import { ModernStackShowcase } from './components/ModernStackShowcase';
 import { FaqAccordion } from './components/FaqAccordion';
@@ -35,7 +40,22 @@ import {
   INITIAL_ACTIVE_SESSIONS,
   INITIAL_KNOWLEDGE_PASSPORT
 } from './data/mockData';
-import { SkillNode, SkillEdge, BarterChain, TrustAnchor, Sprint, PostSkillSubmission, ActiveBarterSession, KnowledgePassportData, VerifiableAttestation } from './types';
+import { INITIAL_GIGS } from './data/creatorMarketplaceData';
+import {
+  SkillNode,
+  SkillEdge,
+  BarterChain,
+  TrustAnchor,
+  Sprint,
+  PostSkillSubmission,
+  ActiveBarterSession,
+  KnowledgePassportData,
+  VerifiableAttestation,
+  CurrencyCode,
+  CreatorProfile,
+  GigItem,
+  GigCategory
+} from './types';
 import {
   Network,
   ArrowRightLeft,
@@ -68,6 +88,15 @@ export default function App() {
   const [isPostGigModalOpen, setIsPostGigModalOpen] = useState<boolean>(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
   const [legalModalType, setLegalModalType] = useState<'privacy' | 'terms' | null>(null);
+
+  // 5 Unique Ecosystem Modal & Currency States
+  const [currency, setCurrency] = useState<CurrencyCode>('USD');
+  const [isBriefCopilotOpen, setIsBriefCopilotOpen] = useState<boolean>(false);
+  const [isRateCalculatorOpen, setIsRateCalculatorOpen] = useState<boolean>(false);
+  const [isDisputeArbitratorOpen, setIsDisputeArbitratorOpen] = useState<boolean>(false);
+  const [isCircularBarterOpen, setIsCircularBarterOpen] = useState<boolean>(false);
+  const [isPassportModalOpen, setIsPassportModalOpen] = useState<boolean>(false);
+  const [selectedPassportCreator, setSelectedPassportCreator] = useState<CreatorProfile | undefined>(undefined);
 
   const [skills, setSkills] = useState<SkillNode[]>(INITIAL_SKILL_NODES);
   const [edges, setEdges] = useState<SkillEdge[]>(INITIAL_SKILL_EDGES);
@@ -462,6 +491,12 @@ export default function App() {
         }}
         barterChainsCount={barterChains.length}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+        currency={currency}
+        onSetCurrency={setCurrency}
+        onOpenBriefCopilot={() => setIsBriefCopilotOpen(true)}
+        onOpenRateCalculator={() => setIsRateCalculatorOpen(true)}
+        onOpenCircularBarter={() => setIsCircularBarterOpen(true)}
+        onOpenDisputeArbitrator={() => setIsDisputeArbitratorOpen(true)}
       />
 
       {/* Main Container */}
@@ -565,6 +600,31 @@ export default function App() {
               onOpenPostModal={() => setIsPostGigModalOpen(true)}
               onClosePostModal={() => setIsPostGigModalOpen(false)}
               onAddToast={addToast}
+              currency={currency}
+              onOpenPassport={(creatorName) => {
+                const gig = INITIAL_GIGS.find((g) => g.creatorName.toLowerCase() === creatorName?.toLowerCase()) || INITIAL_GIGS[0];
+                const profile: CreatorProfile = {
+                  id: gig.creatorId,
+                  name: gig.creatorName,
+                  title: `${gig.category} Specialist`,
+                  avatar: gig.creatorAvatar,
+                  bio: gig.creatorBio,
+                  rating: gig.rating,
+                  reviewsCount: gig.reviewsCount,
+                  completedGigsCount: gig.completedGigs,
+                  category: gig.category,
+                  hourlyRate: gig.rate,
+                  skills: gig.tags,
+                  badges: ['Community Vetted', 'Top 5% Response'],
+                  reputationScore: 98,
+                  barterHoursCompleted: 14.5,
+                  responseRatePercent: 99,
+                };
+                setSelectedPassportCreator(profile);
+                setIsPassportModalOpen(true);
+              }}
+              onOpenBriefCopilot={() => setIsBriefCopilotOpen(true)}
+              onOpenRateCalculator={() => setIsRateCalculatorOpen(true)}
             />
 
             {/* Mode Switch Transition Callout */}
@@ -923,6 +983,63 @@ export default function App() {
         onClose={() => setIsLiveWorkspaceOpen(false)}
         session={currentWorkspaceSession || activeSessions[0] || null}
         onAttestAndSettle={handleAttestAndSettleFromWorkspace}
+        onAddToast={addToast}
+      />
+
+      {/* 5 Unique Advanced Ecosystem Modals */}
+      <BriefAiCopilotModal
+        isOpen={isBriefCopilotOpen}
+        onClose={() => setIsBriefCopilotOpen(false)}
+        gigs={INITIAL_GIGS}
+        onSelectGigToBook={(gig, prefilledBrief) => {
+          setIsBriefCopilotOpen(false);
+          setAppMode('creator_market');
+          setMarketplaceTab('browse');
+          addToast(
+            'Creator Gig Matched',
+            `Selected "${gig.title}" by ${gig.creatorName}. ${prefilledBrief ? 'Brief loaded!' : ''}`,
+            'success'
+          );
+        }}
+        currency={currency}
+        onAddToast={addToast}
+      />
+
+      <FreelanceRateCalculatorModal
+        isOpen={isRateCalculatorOpen}
+        onClose={() => setIsRateCalculatorOpen(false)}
+        currency={currency}
+        onOpenPostGigWithRate={(rate, category) => {
+          setIsRateCalculatorOpen(false);
+          setAppMode('creator_market');
+          setIsPostGigModalOpen(true);
+          addToast('Rate Applied', `Preset $${rate}/hr loaded for ${category} gig.`, 'info');
+        }}
+        onAddToast={addToast}
+      />
+
+      <EscrowDisputeArbitratorModal
+        isOpen={isDisputeArbitratorOpen}
+        onClose={() => setIsDisputeArbitratorOpen(false)}
+        currency={currency}
+        onAddToast={addToast}
+      />
+
+      <CircularBarterLoopVisualizer
+        isOpen={isCircularBarterOpen}
+        onClose={() => setIsCircularBarterOpen(false)}
+        currency={currency}
+        onAddToast={addToast}
+      />
+
+      <CreatorPassportCardModal
+        isOpen={isPassportModalOpen}
+        onClose={() => {
+          setIsPassportModalOpen(false);
+          setSelectedPassportCreator(undefined);
+        }}
+        creator={selectedPassportCreator}
+        currency={currency}
         onAddToast={addToast}
       />
 

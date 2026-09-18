@@ -11,15 +11,26 @@ import {
   ArrowUpDown,
   Info,
   Users,
-  AlertCircle
+  AlertCircle,
+  Award,
+  Bot,
+  Calculator,
+  ShieldCheck,
+  Zap
 } from 'lucide-react';
-import { GigItem, GigCategory, DiscoverySortOption, DoubleBookingPolicy } from '../../types';
+import { GigItem, GigCategory, DiscoverySortOption, DoubleBookingPolicy, CurrencyCode } from '../../types';
+import { formatPrice } from '../../utils/currency';
+import { AudioPitchPlayer } from './AudioPitchPlayer';
 
 interface BrowseGigsSectionProps {
   gigs: GigItem[];
   onSelectBookGig: (gig: GigItem) => void;
   onOpenPostModal: () => void;
   doubleBookingPolicy: DoubleBookingPolicy;
+  currency: CurrencyCode;
+  onOpenPassport?: (creatorName: string) => void;
+  onOpenBriefCopilot?: () => void;
+  onOpenRateCalculator?: () => void;
 }
 
 const CATEGORIES: ('All' | GigCategory)[] = [
@@ -37,6 +48,10 @@ export const BrowseGigsSection: React.FC<BrowseGigsSectionProps> = ({
   onSelectBookGig,
   onOpenPostModal,
   doubleBookingPolicy,
+  currency,
+  onOpenPassport,
+  onOpenBriefCopilot,
+  onOpenRateCalculator,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'All' | GigCategory>('All');
@@ -84,6 +99,46 @@ export const BrowseGigsSection: React.FC<BrowseGigsSectionProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Top Value Banner with AI Copilot & Rate Calc triggers */}
+      <div className="rounded-3xl border border-indigo-100 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 p-5 sm:p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="rounded-lg bg-cyan-400/20 border border-cyan-400/30 px-2 py-0.5 text-[10px] font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1">
+              <Zap className="h-3 w-3" /> Groq 500 tok/s Powered
+            </span>
+            <span className="text-xs text-purple-200">Zero-Loss Escrow Protection</span>
+          </div>
+          <h2 className="text-lg sm:text-xl font-black tracking-tight">
+            Find Top Creators or Let AI Scope Your Project
+          </h2>
+          <p className="text-xs text-indigo-200 max-w-xl">
+            Match with vetted video editors, 3D animators, Figma designers, and full-stack devs with milestone escrow protection.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 w-full md:w-auto">
+          {onOpenBriefCopilot && (
+            <button
+              onClick={onOpenBriefCopilot}
+              className="flex-1 md:flex-initial flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-400 hover:to-indigo-400 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-md transition-all active:scale-95"
+            >
+              <Bot className="h-4 w-4" />
+              <span>AI Brief Copilot</span>
+            </button>
+          )}
+
+          {onOpenRateCalculator && (
+            <button
+              onClick={onOpenRateCalculator}
+              className="flex-1 md:flex-initial flex items-center justify-center gap-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 px-3.5 py-2.5 text-xs font-bold text-white transition-colors"
+            >
+              <Calculator className="h-4 w-4" />
+              <span>Rate Calc</span>
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Search & Filter Top Bar */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs">
         {/* Search input */}
@@ -110,7 +165,7 @@ export const BrowseGigsSection: React.FC<BrowseGigsSectionProps> = ({
             >
               <option value="smart_rotation">Fair Rotation (DP3 Default)</option>
               <option value="newest">Newest First</option>
-              <option value="cheapest">Lowest Rate ($)</option>
+              <option value="cheapest">Lowest Rate</option>
               <option value="highest_rated">Highest Rated (★)</option>
               <option value="fastest">Fastest Turnaround</option>
             </select>
@@ -180,7 +235,7 @@ export const BrowseGigsSection: React.FC<BrowseGigsSectionProps> = ({
         </div>
         <div className="flex items-center gap-1 text-[11px]">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-          <span>Zero Client Platform Fees</span>
+          <span>Zero Client Platform Fees · Displaying in {currency}</span>
         </div>
       </div>
 
@@ -213,17 +268,17 @@ export const BrowseGigsSection: React.FC<BrowseGigsSectionProps> = ({
             return (
               <div
                 key={gig.id}
-                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs transition-all hover:border-slate-300 hover:shadow-lg"
+                className="group flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs transition-all hover:border-slate-300 hover:shadow-lg"
               >
                 {/* Card Top */}
-                <div className="p-5">
-                  {/* Creator Info */}
+                <div className="p-5 space-y-3">
+                  {/* Creator Info & Passport Trigger */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2.5">
                       <img
                         src={gig.creatorAvatar}
                         alt={gig.creatorName}
-                        className="h-10 w-10 rounded-full border border-slate-200 object-cover"
+                        className="h-10 w-10 rounded-xl border border-slate-200 object-cover"
                       />
                       <div>
                         <div className="flex items-center gap-1.5">
@@ -236,23 +291,39 @@ export const BrowseGigsSection: React.FC<BrowseGigsSectionProps> = ({
                       </div>
                     </div>
 
-                    <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">
-                      {gig.category}
-                    </span>
+                    {onOpenPassport && (
+                      <button
+                        onClick={() => onOpenPassport(gig.creatorName)}
+                        className="flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 px-2 py-1 rounded-lg transition-colors"
+                        title="View Verified Creator Passport"
+                      >
+                        <Award className="h-3 w-3 text-indigo-600" />
+                        <span>Passport</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* Title */}
-                  <h3 className="mt-3.5 text-sm font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                  <h3 className="text-sm font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
                     {gig.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="mt-2 text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
                     {gig.description}
                   </p>
 
+                  {/* 30s Audio Pitch Waveform Player */}
+                  <div className="pt-1">
+                    <AudioPitchPlayer
+                      creatorName={gig.creatorName.split(' ')[0]}
+                      tone={gig.category === 'Video & Animation' ? 'energetic' : gig.category === 'Web & Coding' ? 'professional' : 'calm'}
+                      compact={true}
+                    />
+                  </div>
+
                   {/* Tags */}
-                  <div className="mt-3 flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1.5 pt-1">
                     {gig.tags.slice(0, 3).map((tag, idx) => (
                       <span
                         key={idx}
@@ -265,10 +336,10 @@ export const BrowseGigsSection: React.FC<BrowseGigsSectionProps> = ({
 
                   {/* DP2 Notice if pending bookings exist */}
                   {hasPending && (
-                    <div className="mt-3 rounded-lg bg-amber-50/80 border border-amber-200/70 p-2 text-[10px] text-amber-800 flex items-center justify-between">
+                    <div className="rounded-xl bg-amber-50/80 border border-amber-200/70 p-2 text-[10px] text-amber-800 flex items-center justify-between">
                       <span className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
-                        {gig.pendingBookingsCount} client currently in queue
+                        {gig.pendingBookingsCount} client in queue
                       </span>
                       <span className="font-bold">
                         {isStrictLocked ? 'Lockout Active' : 'Accepting'}
@@ -294,7 +365,7 @@ export const BrowseGigsSection: React.FC<BrowseGigsSectionProps> = ({
                   <div className="flex items-center gap-3">
                     <div className="text-right">
                       <div className="text-base font-extrabold text-slate-900 leading-none">
-                        ${gig.rate}
+                        {formatPrice(gig.rate, currency)}
                       </div>
                       <span className="text-[10px] text-slate-500 font-medium">
                         {gig.rateType === 'hourly' ? '/ hr' : 'fixed'}
@@ -305,7 +376,7 @@ export const BrowseGigsSection: React.FC<BrowseGigsSectionProps> = ({
                       id={`book-gig-btn-${gig.id}`}
                       onClick={() => onSelectBookGig(gig)}
                       disabled={isStrictLocked}
-                      className="rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition-all active:scale-[0.98]"
+                      className="rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition-all active:scale-[0.98]"
                     >
                       {isStrictLocked ? 'Locked' : 'Book Gig'}
                     </button>

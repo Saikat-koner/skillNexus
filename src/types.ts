@@ -313,3 +313,115 @@ export interface BookingItem {
 
 export type DoubleBookingPolicy = 'flexible_queue' | 'strict_lockout';
 export type DiscoverySortOption = 'smart_rotation' | 'newest' | 'cheapest' | 'highest_rated' | 'fastest';
+
+// ==========================================
+// UNIQUE ADVANCED ECOSYSTEM TYPES
+// ==========================================
+
+export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'INR' | 'CAD' | 'USDC';
+
+export interface CurrencyConfig {
+  code: CurrencyCode;
+  symbol: string;
+  name: string;
+  exchangeRateFromUSD: number;
+}
+
+export interface AudioPitchData {
+  durationSec: number;
+  waveform: number[];
+  introTitle: string;
+  audioTone?: 'energetic' | 'calm' | 'professional';
+}
+
+export interface AiProjectMilestone {
+  title: string;
+  durationDays: number;
+  deliverables: string[];
+  suggestedEscrowPercent: number;
+}
+
+export interface AiBriefMatchResult {
+  clientPrompt: string;
+  detectedCategory: GigCategory;
+  estimatedBudgetUSD: { min: number; max: number };
+  estimatedTurnaroundDays: number;
+  milestones: AiProjectMilestone[];
+  topMatchedGigIds: string[];
+  matchSummary: string;
+  groqLatencyMs: number;
+  tokensGenerated: number;
+}
+
+export interface RateEstimateResult {
+  skillCategory: string;
+  experienceLevel: string;
+  starterRateUSD: number;
+  standardRateUSD: number;
+  proRateUSD: number;
+  hourlyBenchmarkUSD: number;
+  marketPercentile: number;
+  pricingAdvice: string;
+}
+
+export interface MultiPartyLoopNode {
+  id: string;
+  name: string;
+  avatar: string;
+  givesSkill: string;
+  receivesSkill: string;
+  hours: number;
+  color: string;
+}
+
+export interface MultiPartyLoop {
+  id: string;
+  title: string;
+  efficiencyGain: string;
+  nodes: MultiPartyLoopNode[];
+  totalValueUSD: number;
+  status: 'active_pool' | 'settled';
+}
+
+export interface DisputeParty {
+  name: string;
+  role: 'Client' | 'Creator';
+  claim: string;
+  avatar: string;
+}
+
+export interface DisputeCase {
+  id: string;
+  orderId: string;
+  gigTitle: string;
+  totalEscrowUSD: number;
+  client: DisputeParty;
+  creator: DisputeParty;
+  issueSummary: string;
+  aiArbitrationBreakdown: {
+    clientRefundPercent: number;
+    creatorPayoutPercent: number;
+    rationale: string;
+    unlockedDeliverables: string[];
+  };
+  status: 'deliberating' | 'settled';
+}
+
+export interface CreatorProfile {
+  id: string;
+  name: string;
+  title: string;
+  avatar: string;
+  bio: string;
+  rating: number;
+  reviewsCount: number;
+  completedGigsCount: number;
+  category: GigCategory;
+  hourlyRate: number;
+  skills: string[];
+  badges: string[];
+  reputationScore: number;
+  barterHoursCompleted: number;
+  responseRatePercent: number;
+}
+

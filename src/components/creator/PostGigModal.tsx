@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { X, Sparkles, DollarSign, Clock, Layers, CheckCircle2, Tag } from 'lucide-react';
-import { GigItem, GigCategory, GigRateType } from '../../types';
+import { GigItem, GigCategory, GigRateType, CurrencyCode } from '../../types';
+import { CURRENCY_CONFIGS } from '../../utils/currency';
 
 interface PostGigModalProps {
   isOpen: boolean;
   onClose: () => void;
   onPostGig: (gig: GigItem) => void;
   onAddToast: (title: string, message: string, type?: 'success' | 'info' | 'chain') => void;
+  currency?: CurrencyCode;
 }
 
 const CATEGORIES: GigCategory[] = [
@@ -23,6 +25,7 @@ export const PostGigModal: React.FC<PostGigModalProps> = ({
   onClose,
   onPostGig,
   onAddToast,
+  currency = 'USD',
 }) => {
   if (!isOpen) return null;
 
@@ -146,10 +149,12 @@ export const PostGigModal: React.FC<PostGigModalProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Rate ($ USD) <span className="text-red-500">*</span>
+                Rate ({CURRENCY_CONFIGS[currency].symbol} {currency}) <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-2.5 text-xs font-bold text-slate-400">$</span>
+                <span className="absolute left-3 top-2.5 text-xs font-bold text-slate-400">
+                  {CURRENCY_CONFIGS[currency].symbol}
+                </span>
                 <input
                   type="number"
                   min="5"

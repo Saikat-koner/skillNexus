@@ -13,7 +13,8 @@ import {
   TrendingUp,
   MessageSquare
 } from 'lucide-react';
-import { BookingItem, GigItem } from '../../types';
+import { BookingItem, GigItem, CurrencyCode } from '../../types';
+import { formatPrice } from '../../utils/currency';
 
 interface CreatorDashboardViewProps {
   bookings: BookingItem[];
@@ -22,6 +23,7 @@ interface CreatorDashboardViewProps {
   onDeclineBooking: (bookingId: string, reason: string, note: string) => void;
   onOpenPostModal: () => void;
   onAddToast: (title: string, message: string, type?: 'success' | 'info' | 'chain') => void;
+  currency?: CurrencyCode;
 }
 
 export const CreatorDashboardView: React.FC<CreatorDashboardViewProps> = ({
@@ -31,6 +33,7 @@ export const CreatorDashboardView: React.FC<CreatorDashboardViewProps> = ({
   onDeclineBooking,
   onOpenPostModal,
   onAddToast,
+  currency = 'USD',
 }) => {
   // Decline modal state (Direct DP1 integration)
   const [decliningBooking, setDecliningBooking] = useState<BookingItem | null>(null);
@@ -92,7 +95,7 @@ export const CreatorDashboardView: React.FC<CreatorDashboardViewProps> = ({
             <span>Total Earnings</span>
             <DollarSign className="h-4 w-4 text-indigo-600" />
           </div>
-          <div className="mt-2 text-2xl font-black text-indigo-700">${totalEarned}</div>
+          <div className="mt-2 text-2xl font-black text-indigo-700">{formatPrice(totalEarned, currency)}</div>
           <p className="mt-1 text-[11px] text-slate-500">0% platform commission retained</p>
         </div>
 
@@ -174,7 +177,7 @@ export const CreatorDashboardView: React.FC<CreatorDashboardViewProps> = ({
                         </div>
                         <div className="flex items-center gap-1">
                           <DollarSign className="h-3.5 w-3.5 text-emerald-600" />
-                          <span>Payout: <strong className="text-emerald-700 font-bold">${b.rate}</strong></span>
+                          <span>Payout: <strong className="text-emerald-700 font-bold">{formatPrice(b.rate, currency)}</strong></span>
                         </div>
                       </div>
                     </div>
@@ -245,7 +248,7 @@ export const CreatorDashboardView: React.FC<CreatorDashboardViewProps> = ({
               </div>
 
               <div className="text-right text-xs">
-                <span className="font-bold text-slate-900">${b.rate}</span>
+                <span className="font-bold text-slate-900">{formatPrice(b.rate, currency)}</span>
                 <span className="text-[11px] text-slate-400 block">{b.submittedAt}</span>
               </div>
             </div>

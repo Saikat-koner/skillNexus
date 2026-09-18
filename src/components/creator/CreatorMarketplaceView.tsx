@@ -16,7 +16,8 @@ import {
   BookingItem,
   GigCategory,
   DoubleBookingPolicy,
-  DiscoverySortOption
+  DiscoverySortOption,
+  CurrencyCode
 } from '../../types';
 import { INITIAL_GIGS, INITIAL_BOOKINGS } from '../../data/creatorMarketplaceData';
 import { BrowseGigsSection } from './BrowseGigsSection';
@@ -33,6 +34,10 @@ interface CreatorMarketplaceViewProps {
   onOpenPostModal?: () => void;
   onClosePostModal?: () => void;
   onAddToast: (title: string, message: string, type?: 'success' | 'info' | 'chain') => void;
+  currency?: CurrencyCode;
+  onOpenPassport?: (creatorName: string) => void;
+  onOpenBriefCopilot?: () => void;
+  onOpenRateCalculator?: () => void;
 }
 
 export type MarketplaceSubTab = 'browse' | 'dashboard' | 'bookings' | 'decision_points';
@@ -44,6 +49,10 @@ export const CreatorMarketplaceView: React.FC<CreatorMarketplaceViewProps> = ({
   onOpenPostModal: propOnOpenPostModal,
   onClosePostModal: propOnClosePostModal,
   onAddToast,
+  currency = 'USD',
+  onOpenPassport,
+  onOpenBriefCopilot,
+  onOpenRateCalculator,
 }) => {
   const [internalTab, setInternalTab] = useState<MarketplaceSubTab>('browse');
   const activeTab = propActiveTab !== undefined ? propActiveTab : internalTab;
@@ -380,6 +389,10 @@ export const CreatorMarketplaceView: React.FC<CreatorMarketplaceViewProps> = ({
             onSelectBookGig={(gig) => setSelectedGigForBooking(gig)}
             onOpenPostModal={() => setIsPostGigModalOpen(true)}
             doubleBookingPolicy={doubleBookingPolicy}
+            currency={currency}
+            onOpenPassport={onOpenPassport}
+            onOpenBriefCopilot={onOpenBriefCopilot}
+            onOpenRateCalculator={onOpenRateCalculator}
           />
         )}
 
@@ -391,6 +404,7 @@ export const CreatorMarketplaceView: React.FC<CreatorMarketplaceViewProps> = ({
             onDeclineBooking={handleDeclineBooking}
             onOpenPostModal={() => setIsPostGigModalOpen(true)}
             onAddToast={onAddToast}
+            currency={currency}
           />
         )}
 
@@ -401,6 +415,7 @@ export const CreatorMarketplaceView: React.FC<CreatorMarketplaceViewProps> = ({
             onResubmitBooking={handleResubmitBooking}
             onBrowseMarketplace={() => setActiveTab('browse')}
             onAddToast={onAddToast}
+            currency={currency}
           />
         )}
 
@@ -435,6 +450,7 @@ export const CreatorMarketplaceView: React.FC<CreatorMarketplaceViewProps> = ({
         onClose={() => setIsPostGigModalOpen(false)}
         onPostGig={handlePostGig}
         onAddToast={onAddToast}
+        currency={currency}
       />
 
       {/* Feature 3: Book a Gig Modal */}
@@ -445,6 +461,7 @@ export const CreatorMarketplaceView: React.FC<CreatorMarketplaceViewProps> = ({
         doubleBookingPolicy={doubleBookingPolicy}
         onConfirmBooking={handleConfirmBooking}
         onViewMyBookings={() => setActiveTab('bookings')}
+        currency={currency}
       />
     </section>
   );
