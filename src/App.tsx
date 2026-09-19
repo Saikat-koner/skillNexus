@@ -82,6 +82,29 @@ import {
 } from 'lucide-react';
 
 export default function App() {
+  // Theme state with localStorage persistence
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('skillnexus_theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('skillnexus_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
   // App mode defaulting to Creator Marketplace
   const [appMode, setAppMode] = useState<AppMode>('creator_market');
   const [marketplaceTab, setMarketplaceTab] = useState<MarketplaceSubTab>('browse');
@@ -465,7 +488,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-indigo-500/20 selection:text-indigo-700">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-indigo-500/20 selection:text-indigo-700 dark:selection:text-indigo-300 transition-colors duration-200">
       {/* Top sticky navigation */}
       <Navbar
         appMode={appMode}
@@ -497,6 +520,8 @@ export default function App() {
         onOpenRateCalculator={() => setIsRateCalculatorOpen(true)}
         onOpenCircularBarter={() => setIsCircularBarterOpen(true)}
         onOpenDisputeArbitrator={() => setIsDisputeArbitratorOpen(true)}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Main Container */}
@@ -504,51 +529,51 @@ export default function App() {
         {appMode === 'creator_market' ? (
           <>
             {/* Creator Economy Hero Banner */}
-            <section className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-gradient-to-br from-white via-indigo-50/40 to-cyan-50/30 p-6 sm:p-10 shadow-xl shadow-slate-200/50 backdrop-blur-xl">
-              <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-indigo-500/10 blur-3xl"></div>
-              <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-cyan-500/10 blur-3xl"></div>
+            <section className="relative overflow-hidden rounded-3xl border border-slate-200/90 dark:border-slate-800/90 bg-gradient-to-br from-white via-indigo-50/40 to-cyan-50/30 dark:from-slate-900 dark:via-indigo-950/30 dark:to-slate-900/60 p-6 sm:p-10 shadow-xl shadow-slate-200/50 dark:shadow-black/40 backdrop-blur-xl">
+              <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 blur-3xl"></div>
+              <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-cyan-500/10 dark:bg-cyan-500/20 blur-3xl"></div>
 
               <div className="relative z-10 max-w-3xl">
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700 shadow-xs">
-                    <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-500/30 dark:border-indigo-500/40 bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 text-xs font-bold text-indigo-700 dark:text-indigo-300 shadow-xs">
+                    <Sparkles className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
                     <span>The Creator Economy Runs on Marketplaces</span>
                   </span>
 
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-800">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                     <span>5 Features + 3 Decision Points (20 PTS)</span>
                   </span>
                 </div>
 
-                <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
                   Where Young Creators Monetize Skills &{' '}
-                  <span className="bg-gradient-to-r from-indigo-600 via-cyan-600 to-purple-600 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-indigo-600 via-cyan-600 to-purple-600 dark:from-indigo-400 dark:via-cyan-400 dark:to-purple-400 bg-clip-text text-transparent">
                     Clients Book Gigs.
                   </span>
                 </h1>
 
-                <p className="mt-4 text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl">
+                <p className="mt-4 text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
                   Empowering Gen-Z and student creators to turn real-world creative capabilities (video editing, branding, beats, web coding, copywriting) into paid client engagements with zero barrier to entry.
                 </p>
 
                 {/* Platform Metrics */}
-                <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-200/80 pt-6">
+                <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-200/80 dark:border-slate-800/80 pt-6">
                   <div>
-                    <div className="text-xl sm:text-2xl font-black text-slate-900">6 Specialized</div>
-                    <div className="text-[11px] font-medium text-slate-500">Live Creator Gigs</div>
+                    <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">6 Specialized</div>
+                    <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Live Creator Gigs</div>
                   </div>
                   <div>
-                    <div className="text-xl sm:text-2xl font-black text-cyan-600">$25 - $80</div>
-                    <div className="text-[11px] font-medium text-slate-500">Young Creator Rates</div>
+                    <div className="text-xl sm:text-2xl font-black text-cyan-600 dark:text-cyan-400">$25 - $80</div>
+                    <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Young Creator Rates</div>
                   </div>
                   <div>
-                    <div className="text-xl sm:text-2xl font-black text-emerald-600">1 - 3 Days</div>
-                    <div className="text-[11px] font-medium text-slate-500">Rapid Turnaround Times</div>
+                    <div className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">1 - 3 Days</div>
+                    <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Rapid Turnaround Times</div>
                   </div>
                   <div>
-                    <div className="text-xl sm:text-2xl font-black text-indigo-600">$0.00 Hold</div>
-                    <div className="text-[11px] font-medium text-slate-500">Guaranteed Escrow Protection</div>
+                    <div className="text-xl sm:text-2xl font-black text-indigo-600 dark:text-indigo-400">$0.00 Hold</div>
+                    <div className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Guaranteed Escrow Protection</div>
                   </div>
                 </div>
 
@@ -566,16 +591,16 @@ export default function App() {
                   <button
                     id="hero-post-gig-btn"
                     onClick={() => setIsPostGigModalOpen(true)}
-                    className="flex items-center gap-2 rounded-xl border border-indigo-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-indigo-700 shadow-xs hover:bg-indigo-50 transition-all"
+                    className="flex items-center gap-2 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs sm:text-sm font-bold text-indigo-700 dark:text-indigo-300 shadow-xs hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition-all"
                   >
-                    <PlusCircle className="h-4 w-4 text-indigo-600" />
+                    <PlusCircle className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                     <span>Post a Gig (Feature 1)</span>
                   </button>
 
                   <button
                     id="hero-dashboard-btn"
                     onClick={() => setMarketplaceTab('dashboard')}
-                    className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-800 shadow-xs hover:bg-slate-50 transition-all"
+                    className="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 shadow-xs hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-all"
                   >
                     <span>Creator Dashboard (1 Pending)</span>
                   </button>
@@ -583,9 +608,9 @@ export default function App() {
                   <button
                     id="hero-decision-points-btn"
                     onClick={() => setMarketplaceTab('decision_points')}
-                    className="flex items-center gap-2 rounded-xl border border-cyan-200 bg-cyan-50/70 px-4 py-2.5 text-xs sm:text-sm font-bold text-cyan-800 shadow-xs hover:bg-cyan-100 transition-all"
+                    className="flex items-center gap-2 rounded-xl border border-cyan-200 dark:border-cyan-800 bg-cyan-50/70 dark:bg-cyan-950/60 px-4 py-2.5 text-xs sm:text-sm font-bold text-cyan-800 dark:text-cyan-300 shadow-xs hover:bg-cyan-100 dark:hover:bg-cyan-900/60 transition-all"
                   >
-                    <Sliders className="h-4 w-4 text-cyan-700" />
+                    <Sliders className="h-4 w-4 text-cyan-700 dark:text-cyan-400" />
                     <span>20 PTS Decision Points</span>
                   </button>
                 </div>
