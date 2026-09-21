@@ -425,3 +425,5 @@ export interface CreatorProfile {
   responseRatePercent: number;
 }
 
+export type BudgetRangeFilter = 'all' | '0-50' | '50-200' | '200+';
+
